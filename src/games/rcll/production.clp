@@ -296,6 +296,18 @@
 	)
 )
 
+(defrule production-bs-processed
+  "React on processed operation at BS. Keep track of operation info"
+  ?m <- (machine (name ?n) (mtype BS) (state PROCESSED) (team ?team)
+                 (bs-color ?base-color))
+  =>
+  (do-for-fact ((?gs gamestate)) (eq ?gs:state RUNNING)
+    (assert (product-processed (at-machine ?n) (mtype BS)
+                               (team ?team) (game-time ?gs:game-time)
+                               (base-color ?base-color)))
+  )
+)
+
 (defrule production-rs-insufficient-bases
   "The RS has been prepared but it does not have sufficient additional material; switch to BROKEN."
   (gamestate (state RUNNING) (phase PRODUCTION) (game-time ?gt))
@@ -343,6 +355,18 @@
 	(printout t "Machine " ?n ": move to output" crlf)
 	(modify ?m (state PROCESSED) (task MOVE-OUT) (mps-busy WAIT))
 	(mps-move-conveyor (str-cat ?n) "OUTPUT" "FORWARD")
+)
+
+(defrule production-rs-processed
+  "React on processed operation at RS. Keep track of operation info"
+  ?m <- (machine (name ?n) (mtype RS) (state PROCESSED) (team ?team)
+                 (rs-ring-color ?ring-color))
+  =>
+  (do-for-fact ((?gs gamestate)) (eq ?gs:state RUNNING)
+    (assert (product-processed (at-machine ?n) (mtype RS)
+                               (team ?team) (game-time ?gs:game-time)
+                               (ring-color ?ring-color)))
+  )
 )
 
 (defrule production-rs-ignore-slide-counter-in-non-production
@@ -419,6 +443,23 @@
 	(mps-move-conveyor (str-cat ?n) "OUTPUT" "FORWARD")
 	(modify ?m (state PROCESSED) (task MOVE-OUT) (mps-busy WAIT)
 	           (cs-retrieved (eq ?cs-op RETRIEVE_CAP)))
+)
+
+(defrule production-cs-processed
+  "Award points for retrieved cap"
+  ?m <- (machine (name ?n) (mtype CS) (state PROCESSED) (team ?team)
+                 (cs-operation ?cs-op))
+  =>
+  (do-for-fact ((?gs gamestate)) (eq ?gs:state RUNNING)
+     (if (eq ?cs-op RETRIEVE_CAP) then
+       (assert (points (game-time ?gs:game-time) (team ?team) (phase PRODUCTION)
+                       (points ?*PRODUCTION-POINTS-RETRIEVE-CAP*)
+                       (reason (str-cat "Retrieved cap at " ?n))))
+       else
+       (assert (product-processed (at-machine ?n) (mtype CS)
+                                  (team ?team) (game-time ?gs:game-time)))
+     )
+  )
 )
 
 (defrule production-bs-cs-rs-ready-at-output
