@@ -300,11 +300,13 @@
   "React on processed operation at BS. Keep track of operation info"
   ?m <- (machine (name ?n) (mtype BS) (state PROCESSED) (team ?team)
                  (bs-color ?base-color))
+  (confval (path "/llsfrb/workpiece-tracking/enable") (type BOOL) (value ?tracking-enabled))
   =>
   (do-for-fact ((?gs gamestate)) (eq ?gs:state RUNNING)
-    (assert (product-processed (at-machine ?n) (mtype BS)
-                               (team ?team) (game-time ?gs:game-time)
-                               (base-color ?base-color)))
+    (if (eq ?tracking-enabled true) then
+      (assert (product-processed (at-machine ?n) (mtype BS)
+                                 (team ?team) (game-time ?gs:game-time)
+                                 (base-color ?base-color))))
   )
 )
 
@@ -361,11 +363,13 @@
   "React on processed operation at RS. Keep track of operation info"
   ?m <- (machine (name ?n) (mtype RS) (state PROCESSED) (team ?team)
                  (rs-ring-color ?ring-color))
+  (confval (path "/llsfrb/workpiece-tracking/enable") (type BOOL) (value ?tracking-enabled))
   =>
   (do-for-fact ((?gs gamestate)) (eq ?gs:state RUNNING)
-    (assert (product-processed (at-machine ?n) (mtype RS)
-                               (team ?team) (game-time ?gs:game-time)
-                               (ring-color ?ring-color)))
+    (if (eq ?tracking-enabled true) then
+      (assert (product-processed (at-machine ?n) (mtype RS)
+                                 (team ?team) (game-time ?gs:game-time)
+                                 (ring-color ?ring-color))))
   )
 )
 
@@ -449,6 +453,7 @@
   "Award points for retrieved cap"
   ?m <- (machine (name ?n) (mtype CS) (state PROCESSED) (team ?team)
                  (cs-operation ?cs-op))
+  (confval (path "/llsfrb/workpiece-tracking/enable") (type BOOL) (value ?tracking-enabled))
   =>
   (do-for-fact ((?gs gamestate)) (eq ?gs:state RUNNING)
      (if (eq ?cs-op RETRIEVE_CAP) then
@@ -456,9 +461,11 @@
                        (points ?*PRODUCTION-POINTS-RETRIEVE-CAP*)
                        (reason (str-cat "Retrieved cap at " ?n))))
        else
-       (assert (product-processed (at-machine ?n) (mtype CS)
-                                  (team ?team) (game-time ?gs:game-time)))
-     )
+       (if (eq ?tracking-enabled true) then
+         (assert (product-processed (at-machine ?n) (mtype CS)
+                                    (team ?team) (game-time ?gs:game-time)))
+       )
+    )
   )
 )
 
