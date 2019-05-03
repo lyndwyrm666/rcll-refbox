@@ -514,9 +514,15 @@
 (defrule production-ds-processed
   "The DS finished processing the workpiece, set the machine to IDLE and reset it."
 	(gamestate (state RUNNING) (phase PRODUCTION) (game-time ?gt))
-	?m <- (machine (name ?n) (mtype DS) (state PROCESSED))
+	?m <- (machine (name ?n) (mtype DS) (state PROCESSED) (team ?team)
+                   (ds-order ?order))
+    (confval (path "/llsfrb/workpiece-tracking/enable") (type BOOL) (value ?tracking-enabled))
 	=>
   (printout t "Machine " ?n " finished processing" crlf)
+  (if (eq ?tracking-enabled true) then
+    (assert (product-processed (at-machine ?n) (mtype DS)
+                               (team ?team) (game-time ?gt)
+                               (order ?order))))
   (modify ?m (state WAIT-IDLE) (idle-since ?gt))
 )
 
