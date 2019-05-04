@@ -505,24 +505,23 @@
 	               (ds-order ?order) (team ?team))
   =>
 	(modify ?m (state PROCESSED) (task nil))
-	(assert (product-delivered (order ?order) (team ?team) (game-time ?gt)
-	                           (confirmed FALSE)))
-	(assert (attention-message (team ?team)
-	                           (text (str-cat "Please confirm delivery for order " ?order))))
 )
 
 (defrule production-ds-processed
-  "The DS finished processing the workpiece, set the machine to IDLE and reset it."
+  "The DS finished processing the workpiece. Track the process and request for
+  referee to confirm the delivery. Set the machine to IDLE and reset it."
 	(gamestate (state RUNNING) (phase PRODUCTION) (game-time ?gt))
 	?m <- (machine (name ?n) (mtype DS) (state PROCESSED) (team ?team)
                    (ds-order ?order))
     (confval (path "/llsfrb/workpiece-tracking/enable") (type BOOL) (value ?tracking-enabled))
 	=>
   (printout t "Machine " ?n " finished processing" crlf)
-  (if (eq ?tracking-enabled true) then
-    (assert (product-processed (at-machine ?n) (mtype DS)
-                               (team ?team) (game-time ?gt)
-                               (order ?order))))
+  (bind ?p-id (gen-int-id))
+  (assert (product-processed (at-machine ?n) (mtype DS) (team ?team) (game-time ?gt)
+                             (id ?p-id) (order ?order) (confirmed FALSE)))
+  (assert (referee-confirmation (process-id ?p-id) (state REQUIRED)))
+  (assert (attention-message (team ?team)
+	                         (text (str-cat "Please confirm delivery for order " ?order))))
   (modify ?m (state WAIT-IDLE) (idle-since ?gt))
 )
 
