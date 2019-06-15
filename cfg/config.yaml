@@ -26,13 +26,13 @@ llsfrb:
         type: BS
         host: !ipv4 192.168.2.27
         port: !tcp-port 4840
-        connection: mockup
+        connection: plc
       C-CS1:
         active: true
         host: !ipv4 192.168.2.24
         port: !tcp-port 4840
         type: CS
-        connection: mockup
+        connection: plc
       C-CS2:
         active: true
         host: !ipv4 192.168.2.25
@@ -44,7 +44,7 @@ llsfrb:
         host: !ipv4 192.168.2.23
         port: !tcp-port 4840
         type: RS
-        connection: mockup
+        connection: plc
       C-RS2:
         active: true
         host: !ipv4 192.168.2.26
@@ -116,25 +116,25 @@ llsfrb:
     server-port: !tcp-port 4444
     
     public-peer:
-      #host: !ipv4 192.168.122.255
-      host: !ipv4 127.0.0.1
-      #port: !udp-port 4444
-      send-port: !udp-port 4444
-      recv-port: !udp-port 4445
+      host: !ipv4 172.26.255.255
+      #host: !ipv4 127.0.0.1
+      port: !udp-port 4444
+      #send-port: !udp-port 4444
+      #recv-port: !udp-port 4445
 
     cyan-peer:
-      #host: !ipv4 192.168.122.255
-      host: !ipv4 127.0.0.1
-      #port: !udp-port 4441
-      send-port: !udp-port 4441
-      recv-port: !udp-port 4446
+      host: !ipv4 172.26.255.255
+      #host: !ipv4 127.0.0.1
+      port: !udp-port 4441
+      #send-port: !udp-port 4441
+      #recv-port: !udp-port 4446
 
     magenta-peer:
-      #host: !ipv4 192.168.122.255
-      host: !ipv4 127.0.0.1
-      #port: !udp-port 4442
-      send-port: !udp-port 4442
-      recv-port: !udp-port 4447
+      host: !ipv4 172.26.255.255
+      #host: !ipv4 127.0.0.1
+      port: !udp-port 4442
+      #send-port: !udp-port 4442
+      #recv-port: !udp-port 4447
 
   mongodb:
     enable: false
